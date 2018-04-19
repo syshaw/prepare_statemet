@@ -81,7 +81,6 @@ int mysql_stmt_prepare_bind(void *stmt, void **parambind, int *paramcount, void 
 	void *resultbind_buf	= NULL;
 	int paramcount_tmp		= 0;
 	int	resultcount_tmp		= 0;
-	int	ind_size			= 0;
 
 	if (!stmt || !sql) {
 		printf("mysql execute param is invalid\n");
@@ -97,26 +96,22 @@ int mysql_stmt_prepare_bind(void *stmt, void **parambind, int *paramcount, void 
 		printf("mysql_stmt_param_count() failed:%s\n", mysql_stmt_error(stmt));
 		return -1;
 	}
-	bind_size		= paramcount_tmp * sizeof(MYSQL_BIND);
-	parambind_buf	= malloc(bind_size);
+	parambind_buf	= utils_malloc(paramcount_tmp * sizeof(MYSQL_BIND));
 	if (!parambind_buf) {
-		printf("malloc memory failed:line %d\n", __LINE__);
+		printf("param buffer malloc memory failed\n");
 		return -1;
 	}
-	memset(parambind_buf, 0, bind_size);
 
 	if ((resultcount_tmp = mysql_stmt_field_count(stmt)) < 0) {
 		printf("mysql_stmt_field_count() failed:%s\n", mysql_stmt_error(stmt));
 		return -1;
 	}
-	bind_size		= resultcount_tmp * sizeof(MYSQL_BIND);
-	resultbind_buf	= malloc(bind_size);
+	resultbind_buf	= utils_malloc(resultcount_tmp * sizeof(MYSQL_BIND));
 	if (!resultbind_buf) {
-		printf("malloc memory failed:line %d\n", __LINE__);
+		printf("result buffer malloc memory failed\n");
 		free(parambind_buf);
 		return -1;
 	}
-	memset(resultbind_buf, 0, bind_size);
 
 	*parambind		= parambind_buf;
 	*resultbind		= resultbind_buf;
@@ -147,7 +142,7 @@ int mysql_bind_map2(void *bind, int bindsize, int pos, char **data, int datalen)
 	if (!bind || datalen < 0 || pos >= bindsize || pos < 0) {
 		return -1;
 	}
-	*data = (char*)malloc(datalen);
+	*data = (char*)utils_malloc(datalen);
 	if (!*data) {
 		return -1;
 	}
@@ -216,13 +211,13 @@ int mysql_stmt_query_column2(void *stmt, void *bind, int index, char **buf)
 	}
 
 	if(mysql_stmt_fetch_column(stmt, &((MYSQL_BIND *)bind)[index], index, 0)) {
-		printf("mysql_stmt_fetch_column failed(%d)\n", __LINE__);
+		printf("mysql_stmt_fetch_column failed\n");
 		return -1;
 	}
 	len		= strlen(((MYSQL_BIND *)bind)[index].buffer) + 1;
-	*buf	= (char *)malloc(len);
+	*buf	= (char *)utils_malloc(len);
 	if (!*buf) {
-		printf("mysql_stmt_query_column failed(%d)\n", __LINE__);
+		printf("mysql_stmt_query_column failed\n");
 		return -1;
 	}
 	snprintf(*buf, len, "%s", (char *)((MYSQL_BIND *)bind)[index].buffer);

@@ -102,21 +102,19 @@ int mysql_stmt_prepare_bind(void *stmt, void **parambind, int *paramcount, void 
 		return -1;
 	}
 
-	if ((resultcount_tmp = mysql_stmt_field_count(stmt)) < 0) {
-		printf("mysql_stmt_field_count() failed:%s\n", mysql_stmt_error(stmt));
-		return -1;
-	}
-	resultbind_buf	= utils_malloc(resultcount_tmp * sizeof(MYSQL_BIND));
-	if (!resultbind_buf) {
-		printf("result buffer malloc memory failed\n");
-		free(parambind_buf);
-		return -1;
+	if ((resultcount_tmp = mysql_stmt_field_count(stmt)) > 0) {
+		resultbind_buf	= utils_malloc(resultcount_tmp * sizeof(MYSQL_BIND));
+		if (!resultbind_buf) {
+			printf("result buffer malloc memory failed\n");
+			free(parambind_buf);
+			return -1;
+		}
+		*resultbind		= resultbind_buf;
+		*resultcount	= resultcount_tmp;
 	}
 
 	*parambind		= parambind_buf;
-	*resultbind		= resultbind_buf;
 	*paramcount		= paramcount_tmp;
-	*resultcount	= resultcount_tmp;
 
 	return 0;
 }
@@ -160,30 +158,31 @@ int mysql_stmt_query_record(void *stmt, void *parambind, void *resultbind)
 {
 	int err = 0;
 
-	if (!stmt || !resultbind) {
+	if (!stmt) {
 		return -1;
 	}
 	if (parambind && mysql_stmt_bind_param(stmt, parambind)) {
 		printf("mysql_stmt_bind_param() failed:\n%s\n", mysql_stmt_error(stmt));
 		return -1;
 	}
-
 	if (mysql_stmt_execute(stmt)) {
 		printf("mysql_stmt_execute() failed:\n%s\n", mysql_stmt_error(stmt));
 		return -1;
 	}
-	if (mysql_stmt_bind_result(stmt, resultbind)) {
-		printf("mysql_stmt_bind_result() failed:\n%s\n", mysql_stmt_error(stmt));
-		return -1;
-	}
-	if (mysql_stmt_store_result(stmt)) {
-		printf("mysql_stmt_bind_result() failed:\n%s\n", mysql_stmt_error(stmt));
-		return -1;
-	}
 
-	if (err = mysql_stmt_fetch(stmt)) {
-		printf("mysql_stmt_fetch() failed[%d]:\n%s\n", err, mysql_stmt_error(stmt));
-		return -1;
+	if (resultbind) {
+		if (mysql_stmt_bind_result(stmt, resultbind)) {
+			printf("mysql_stmt_bind_result() failed:\n%s\n", mysql_stmt_error(stmt));
+			return -1;
+		}
+		if (mysql_stmt_store_result(stmt)) {
+			printf("mysql_stmt_bind_result() failed:\n%s\n", mysql_stmt_error(stmt));
+			return -1;
+		}
+		if (err = mysql_stmt_fetch(stmt)) {
+			printf("mysql_stmt_fetch() failed[%d]:\n%s\n", err, mysql_stmt_error(stmt));
+			return -1;
+		}
 	}
 
 	return 0;

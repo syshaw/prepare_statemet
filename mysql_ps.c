@@ -77,11 +77,11 @@ int mysql_stmt_initer(void* conn, void **stmt)
 
 int mysql_stmt_prepare_bind(void *stmt, void **parambind, int *paramcount, void **resultbind, int *resultcount, const char *sql)
 {
-	void	*parambind_buf = NULL;
-	void	*resultbind_buf = NULL;
-	int		paramcount_tmp = 0;
-	int		resultcount_tmp = 0;
-	int		bind_size = 0;
+	void *parambind_buf		= NULL;
+	void *resultbind_buf	= NULL;
+	int paramcount_tmp		= 0;
+	int	resultcount_tmp		= 0;
+	int	ind_size			= 0;
 
 	if (!stmt || !sql) {
 		printf("mysql execute param is invalid\n");
@@ -89,9 +89,9 @@ int mysql_stmt_prepare_bind(void *stmt, void **parambind, int *paramcount, void 
 	}
 
 	if (mysql_stmt_prepare(stmt, sql, strlen(sql))) {
-        printf("mysql stmt prepare failed(%s)\n", mysql_stmt_error(stmt));
+ 		printf("mysql stmt prepare failed(%s)\n", mysql_stmt_error(stmt));
 		return -1;
-    }
+	}
 
 	if ((paramcount_tmp = mysql_stmt_param_count(stmt)) < 0) {
 		printf("mysql_stmt_param_count() failed:%s\n", mysql_stmt_error(stmt));
@@ -118,10 +118,10 @@ int mysql_stmt_prepare_bind(void *stmt, void **parambind, int *paramcount, void 
 	}
 	memset(resultbind_buf, 0, bind_size);
 
-	*parambind	= parambind_buf;
-	*resultbind	= resultbind_buf;
-	*paramcount	= paramcount_tmp;
-	*resultcount= resultcount_tmp;
+	*parambind		= parambind_buf;
+	*resultbind		= resultbind_buf;
+	*paramcount		= paramcount_tmp;
+	*resultcount	= resultcount_tmp;
 
 	return 0;
 }
@@ -133,11 +133,11 @@ int mysql_bind_map(void *bind, int bindsize, int pos, char *data, int datalen, u
 	}
 	len[pos] = strlen(data);
 
-    ((MYSQL_BIND*)bind)[pos].buffer_type	= MYSQL_TYPE_VAR_STRING;
-    ((MYSQL_BIND*)bind)[pos].buffer			= (char *)data;
-    ((MYSQL_BIND*)bind)[pos].buffer_length	= datalen;
-    ((MYSQL_BIND*)bind)[pos].is_null		= 0;
-    ((MYSQL_BIND*)bind)[pos].length			= &len[pos];
+	((MYSQL_BIND*)bind)[pos].buffer_type	= MYSQL_TYPE_VAR_STRING;
+	((MYSQL_BIND*)bind)[pos].buffer			= (char *)data;
+	((MYSQL_BIND*)bind)[pos].buffer_length	= datalen;
+	((MYSQL_BIND*)bind)[pos].is_null		= 0;
+	((MYSQL_BIND*)bind)[pos].length			= &len[pos];
 
 	return 0;
 }
@@ -153,9 +153,9 @@ int mysql_bind_map2(void *bind, int bindsize, int pos, char **data, int datalen)
 	}
 
 	((MYSQL_BIND*)bind)[pos].buffer_type	= MYSQL_TYPE_VAR_STRING;
-    ((MYSQL_BIND*)bind)[pos].buffer			= (char *)*data;
-    ((MYSQL_BIND*)bind)[pos].buffer_length	= datalen;
-    ((MYSQL_BIND*)bind)[pos].is_null		= 0;
+	((MYSQL_BIND*)bind)[pos].buffer			= (char *)*data;
+	((MYSQL_BIND*)bind)[pos].buffer_length	= datalen;
+	((MYSQL_BIND*)bind)[pos].is_null		= 0;
 
 	return 0;
 }
@@ -201,7 +201,7 @@ int mysql_stmt_query_column(void *stmt, void *bind, int index, char *buf, int le
 		printf("sql query data fail, param is invalid\n");
 		return -1;
 	}
-    snprintf(buf, len, "%s", !mysql_stmt_fetch_column(stmt, &((MYSQL_BIND *)bind)[index], index, 0) ? (char *)((MYSQL_BIND *)bind)[index].buffer : "");
+	snprintf(buf, len, "%s", !mysql_stmt_fetch_column(stmt, &((MYSQL_BIND *)bind)[index], index, 0) ? (char *)((MYSQL_BIND *)bind)[index].buffer : "");
 
 	return 0;
 }
@@ -215,7 +215,7 @@ int mysql_stmt_query_column2(void *stmt, void *bind, int index, char **buf)
 		return -1;
 	}
 
-    if(mysql_stmt_fetch_column(stmt, &((MYSQL_BIND *)bind)[index], index, 0)) {
+	if(mysql_stmt_fetch_column(stmt, &((MYSQL_BIND *)bind)[index], index, 0)) {
 		printf("mysql_stmt_fetch_column failed(%d)\n", __LINE__);
 		return -1;
 	}

@@ -8,10 +8,10 @@ struct DataNode{
 
 int prepare_statement(struct DataNode** info, char *paramid, char *paramname)
 {
-    void *conn						= NULL;
-    void *stmt						= NULL;
-    void *parambind					= NULL;
-    void *resultbind				= NULL;
+	void *conn						= NULL;
+	void *stmt						= NULL;
+	void *parambind					= NULL;
+	void *resultbind				= NULL;
 	int paramcount					= 0;
 	int resultcount					= 0;
 	unsigned long int *paramlen		= NULL;
@@ -25,16 +25,16 @@ int prepare_statement(struct DataNode** info, char *paramid, char *paramname)
 	struct DataNode *pinfo			= NULL;
 	struct DataNode bindinfo		= {0};
 
-	if (!sql) {
+	if (!paramid || !paramname) {
 		return -1;
 	}
-    if (mysql_conn_initer(&conn, "localhost", "username", "password", "database")) {
+	if (mysql_conn_initer(&conn, "localhost", "username", "password", "database")) {
 		return -2;
-    }
-    if (mysql_stmt_initer(conn, &stmt)) {
+	}
+	if (mysql_stmt_initer(conn, &stmt)) {
 		goto end;
 		return -3;
-    }
+	}
 	snprintf(sql, sizeof(sql), "select id,name,cont from test where id=? and name=?");
 	if (mysql_stmt_prepare_bind(stmt, &parambind, &paramcount, &resultbind, &resultcount, sql) != 0) {
 		ret = -4;
@@ -96,15 +96,15 @@ end:
 
 int main()
 {
-    struct DataNode *node	= NULL;
+	struct DataNode *node	= NULL;
 	int ret					= -1;
-    if (!(ret = prepare_statement(&node, "1", "name_1"))) {
-        printf("id\t:%s\nname\t:%s\ncontent\t:%s\n", node->id, node->name, node->content);
-        utils_free((void**)&node->content);
-        utils_free((void**)&node);
-    } else {
-    	printf("return failed %d\n", ret);
-    }
+	if (!(ret = prepare_statement(&node, "1", "name_1"))) {
+		printf("id\t:%s\nname\t:%s\ncontent\t:%s\n", node->id, node->name, node->content);
+		utils_free((void**)&node->content);
+		utils_free((void**)&node);
+	} else {
+		printf("return failed %d\n", ret);
+	}
 
-    return 0;
+	return 0;
 }
